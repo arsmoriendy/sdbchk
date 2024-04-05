@@ -1,21 +1,18 @@
-package main
+package sdbchk
 
 import (
 	"crypto/sha1"
 	"encoding/csv"
 	"encoding/hex"
 	"fmt"
+	"github.com/arsmoriendy/sdbchk/internal/eprintf"
 	"os"
 )
 
-func main() {
-	sdbchk(os.Args[1], os.Args[2])
-}
-
-func sdbchk(csvFileName string, chckDir string) {
+func SdbChk(csvFileName string, chckDir string) {
 	csvFile, err := os.Open(csvFileName)
 	if err != nil {
-		ePrintf("Failed to open %v: %v", csvFileName, err.Error())
+		eprintf.EPrintf("Failed to open %v: %v", csvFileName, err.Error())
 	}
 	defer csvFile.Close()
 
@@ -25,7 +22,7 @@ func sdbchk(csvFileName string, chckDir string) {
 	for row, err := r.Read(); row != nil; row, err = r.Read() {
 		if err != nil {
 			csvFile.Close()
-			ePrintf("Failed to read %v: %v", csvFileName, err.Error())
+			eprintf.EPrintf("Failed to read %v: %v", csvFileName, err.Error())
 		}
 
 		csvName, csvSum := row[0], row[1]
@@ -40,7 +37,7 @@ func sdbchk(csvFileName string, chckDir string) {
 		fileBytes, err := os.ReadFile(filename)
 		if err != nil {
 			csvFile.Close()
-			ePrintf("Failed to read %v: %v", filename, err.Error())
+			eprintf.EPrintf("Failed to read %v: %v", filename, err.Error())
 		}
 
 		sum := sha1.Sum(fileBytes)
@@ -55,12 +52,4 @@ func sdbchk(csvFileName string, chckDir string) {
 	}
 
 	fmt.Printf("Found %v invalid sums", invalidCount)
-}
-
-/**
- * Printf to stderr and exit with -1
- */
-func ePrintf(format string, a ...any) {
-	fmt.Fprintln(os.Stderr, fmt.Errorf(format, a...))
-	os.Exit(-1)
 }
