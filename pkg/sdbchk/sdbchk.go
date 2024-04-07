@@ -9,11 +9,16 @@ import (
 	"os"
 )
 
-func SdbChk(csvFileName string, chckDir string) {
-	csvFile, err := os.Open(csvFileName)
+func eOpenFile(filename string) *os.File {
+	file, err := os.Open(filename)
 	if err != nil {
-		eprintf.EPrintf("Failed to open %v: %v", csvFileName, err.Error())
+		eprintf.EPrintf("Failed to open %v: %v", filename, err.Error())
 	}
+	return file
+}
+
+func SdbChk(csvFileName string, chckDir string) {
+	csvFile := eOpenFile(csvFileName)
 	defer csvFile.Close()
 
 	r := csv.NewReader(csvFile)
