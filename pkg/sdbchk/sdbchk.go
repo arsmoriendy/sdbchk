@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"encoding/csv"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -26,7 +27,7 @@ func SdbChk(csvFileName string, chckDir string) {
 
 	r := csv.NewReader(csvFile)
 	r.Read() // skip first line (csv header)
-	invalidCount := 0
+	invalidCount, missingCount := 0, 0
 	for row, err := r.Read(); row != nil; row, err = r.Read() {
 		if err != nil {
 			csvFile.Close()
@@ -44,6 +45,12 @@ func SdbChk(csvFileName string, chckDir string) {
 		filename := chckDir + "/" + csvName
 		fileBytes, err := os.ReadFile(filename)
 		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				missingCount++
+				fmt.Println("missing")
+				continue
+			}
+
 			csvFile.Close()
 			eprintf.EPrintf("Failed to read %v: %v", filename, err.Error())
 		}
@@ -59,7 +66,7 @@ func SdbChk(csvFileName string, chckDir string) {
 		}
 	}
 
-	fmt.Printf("Found %v invalid sums", invalidCount)
+	fmt.Printf("Found %v invalid sums\nFound %v missing files", invalidCount, missingCount)
 }
 
 // Extract "Name", "Sha1 Hash" records from a csv.
