@@ -66,7 +66,13 @@ func SdbChk(csvFileName string, chckDir string) {
 		}
 	}
 
-	fmt.Printf("Found %v invalid sums\nFound %v missing files", invalidCount, missingCount)
+	extraFiles := CheckExtra(csvFileName, chckDir)
+	extraCount := len(extraFiles)
+        for _, fn := range extraFiles {
+                fmt.Printf("Checking \"%v\"\textra\n", fn)
+        }
+
+	fmt.Printf("Found %v invalid sums\nFound %v missing files\nFound %v extra files", invalidCount, missingCount, extraCount)
 }
 
 // Extract "Name", "Sha1 Hash" records from a csv.
